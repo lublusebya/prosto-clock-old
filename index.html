@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Часы (Москва) :)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background-color: #e0e0e0;
+    font-family: Arial, sans-serif;
+    display: flex; justify-content: center; align-items: center;
+    min-height: 100vh; padding: 15px;
+  }
+  .container {
+    background-color: #f5f5f5;
+    border: 2px solid #888888;
+    width: 100%; max-width: 420px;
+    box-shadow: 3px 3px 0px #999999;
+  }
+  .header {
+    background: linear-gradient(180deg, #ffffff 0%, #d0d0d0 100%);
+    border-bottom: 2px solid #888888; padding: 12px 15px;
+  }
+  .header h1 {
+    font-size: 18px; color: #333333; text-align: center; font-weight: bold;
+    text-shadow: 1px 1px 0px #ffffff;
+  }
+  .content { padding: 15px; text-align: center; }
+  .canvas-wrap {
+    margin: 10px 0; display: flex; justify-content: center;
+  }
+  canvas {
+    width: 200px; height: 200px; background: #ffffff; border: 2px inset #999;
+  }
+  .digital-clock {
+    background: #ffffff; border: 2px inset #999; padding: 8px; margin-top: 10px;
+    font-family: "Courier New", monospace; font-size: 30px; color: #000;
+  }
+  .footer {
+    margin-top: 15px; text-align: center; font-size: 12px; color: #666;
+    border-top: 1px solid #aaa; padding-top: 8px;
+  }
+  .footer a { color: #333; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>:) Московское время</h1>
+  </div>
+  <div class="content">
+    <div class="canvas-wrap">
+      <canvas id="clockCanvas" width="200" height="200"></canvas>
+    </div>
+    <div class="digital-clock" id="digitalTime">--:--:--</div>
+    <div class="footer">
+      сайт для старых клиентов :)))<br>
+      <a href="https://t.me/lublusebya1111" target="_blank">мой Telegram-канал</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  function getMoscowDate() {
+    var now = new Date();
+    var utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+    return new Date(utc + (3 * 3600000));
+  }
+
+  function drawClock() {
+    var now = getMoscowDate();
+    var hours = now.getHours();
+    var minutes = now.getMinutes();
+    var seconds = now.getSeconds();
+
+    // обновляем цифровое время
+    document.getElementById('digitalTime').innerText =
+      (hours < 10 ? '0' : '') + hours + ':' +
+      (minutes < 10 ? '0' : '') + minutes + ':' +
+      (seconds < 10 ? '0' : '') + seconds;
+
+    var canvas = document.getElementById('clockCanvas');
+    var ctx = canvas.getContext('2d');
+    var w = canvas.width, h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+
+    var centerX = w/2, centerY = h/2;
+    var radius = 85;
+
+    // циферблат
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+    ctx.strokeStyle = '#666';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // метки и цифры
+    ctx.font = 'bold 12px Arial';
+    ctx.fillStyle = '#333';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (var i = 1; i <= 12; i++) {
+      var angle = (i * 30) * Math.PI / 180;
+      var x = centerX + Math.sin(angle) * (radius - 18);
+      var y = centerY - Math.cos(angle) * (radius - 18);
+      ctx.fillText(i.toString(), x, y);
+    }
+
+    // часовая стрелка
+    var hourAngle = ((hours % 12) + minutes / 60) * 30 * Math.PI / 180;
+    drawArrow(ctx, centerX, centerY, hourAngle, radius * 0.5, 6, '#333');
+
+    // минутная стрелка
+    var minuteAngle = (minutes + seconds / 60) * 6 * Math.PI / 180;
+    drawArrow(ctx, centerX, centerY, minuteAngle, radius * 0.7, 4, '#555');
+
+    // секундная стрелка
+    var secondAngle = seconds * 6 * Math.PI / 180;
+    drawArrow(ctx, centerX, centerY, secondAngle, radius * 0.85, 2, '#cc0000');
+
+    // центр
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 5, 0, 2 * Math.PI);
+    ctx.fillStyle = '#333';
+    ctx.fill();
+  }
+
+  function drawArrow(ctx, fromX, fromY, angle, length, width, color) {
+    ctx.beginPath();
+    ctx.moveTo(fromX, fromY);
+    var toX = fromX + Math.sin(angle) * length;
+    var toY = fromY - Math.cos(angle) * length;
+    ctx.lineTo(toX, toY);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+  }
+
+  setInterval(drawClock, 1000);
+  drawClock();
+</script>
+</body>
+</html>
